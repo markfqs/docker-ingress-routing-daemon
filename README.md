@@ -80,6 +80,10 @@ Usage: ./docker-ingress-routing-daemon [--install [OPTIONS] | --uninstall | --he
              --udp-ports <ports>  - UDP ports to disable masquerading for
      --ingress-gateway-ips <ips>  - specify load-balance ingress IPs
                 --no-performance  - disable performance optimisations
+                   --indexed-ids  - use sequential ids for load balancers
+                                    (forced where ingress subnet larger than /24)
+                   --preexisting  - optionally install rules where needed
+                                    on preexisting containers
 
     (services, ports and IPs may be comma or space-separated or may be specified
      multiple times)
@@ -111,8 +115,6 @@ If you add load-balancer nodes to your swarm - or want to start using existing n
 ## Limitations
 
 As the IP TOS byte can store an 8-bit number, this model can in principle support up to 256 load-balancer nodes.
-
-As, currently, the unique `NODE_ID` is determined from the load-balancer node's ingress network IP, the ingress network cannot be larger than a `/24`.
 
 As the implementation requires every container be installed with one policy routing rule and routing table per load-balancer node, there might possibly be some performance degradation as the number of such load-balancer nodes increases (although experience suggests this is unlikely to be noticeable with <= 16 load-balancer endpoint nodes on modern hardware).
 
