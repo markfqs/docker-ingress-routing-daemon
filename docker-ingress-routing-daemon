@@ -1,8 +1,8 @@
 #!/bin/bash
 
-VERSION=4.1.0
+VERSION=4.1.1
 
-# Ingress Routing Daemon v4.1.0
+# Ingress Routing Daemon v4.1.1
 # Copyright © 2020-2021 Struan Bartlett
 # ----------------------------------------------------------------------
 # Permission is hereby granted, free of charge, to any person
@@ -44,7 +44,7 @@ quit() {
 
 detect_ingress() {
   read INGRESS_SUBNET INGRESS_DEFAULT_GATEWAY \
-    < <(docker inspect ingress --format '{{(index .IPAM.Config 0).Subnet}} {{index (split (index .Containers "ingress-sbox").IPv4Address "/") 0}}' 2>/dev/null)
+    < <(docker network inspect ingress --format '{{(index .IPAM.Config 0).Subnet}} {{index (split (index .Containers "ingress-sbox").IPv4Address "/") 0}}' 2>/dev/null)
 
   [ -n "$INGRESS_SUBNET" ] && [ -n "$INGRESS_DEFAULT_GATEWAY" ] && nsenter --net=/var/run/docker/netns/ingress_sbox iptables -L >/dev/null && return 0
 
@@ -127,15 +127,16 @@ usage() {
   echo >&2
   echo "Usage: $0 [--install [OPTIONS] | --uninstall | --help]" >&2
   echo >&2
-  echo "         --services <services>   - service names to disable masquerading for" >&2
-  echo "           --tcp-ports <ports>   - TCP ports to disable masquerading for" >&2
-  echo "           --udp-ports <ports>   - UDP ports to disable masquerading for" >&2
-  echo "   --ingress-gateway-ips <ips>   - load-balancer ingress IPs" >&2
+  echo "         --services <services>   - service names to whitelist (i.e. disable masquerading for)" >&2
+  echo "           --tcp-ports <ports>   - TCP ports to whitelist (i.e. disable masquerading for)" >&2
+  echo "           --udp-ports <ports>   - UDP ports to whitelist (i.e. disable masquerading for)" >&2
+  echo "   --ingress-gateway-ips <ips>   - specify load-balancer ingress IPs" >&2
+  echo "                 --preexisting   - optionally install rules where needed" >&2
+  echo "                                   on preexisting containers (recommended)" >&2
+  echo >&2
   echo "              --no-performance   - disable performance optimisations" >&2
   echo "                 --indexed-ids   - use sequential ids for load balancers" >&2
   echo "                                   (forced where ingress subnet larger than /24)" >&2
-  echo "                 --preexisting   - optionally install rules where needed" >&2
-  echo "                                   on preexisting containers" >&2
   echo >&2
   echo "Notes:" >&2
   echo "- <services>, <ports> and <ips> may be comma-separated, space-separated," >&2
